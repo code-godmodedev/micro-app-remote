@@ -1,0 +1,76 @@
+name: Versioning
+
+on:
+  workflow_call:
+    # Map the workflow outputs to job outputs
+    outputs:
+      new_version:
+        description: "The first output string"
+        value: ${{ jobs.versioning.outputs.new_version }}
+
+jobs:
+  versioning:
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ env.new_version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Ensure VERSION.txt exists
+        id: ensure_version_file
+        run: |
+          if [ ! -f VERSION.txt ]; then
+            echo "0.0.0" > VERSION.txt
+          fi
+
+      - name: Get the current version
+        id: get_version
+        run: echo "version=$(cat VERSION.txt)" >> $GITHUB_ENV
+
+      - name: Get commit message
+        id: get_commit_message
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%B | tail -n 1)
+          echo "commit_message=$COMMIT_MSG" >> $GITHUB_ENV
+
+      - name: Determine version increment
+        id: determine_increment
+        run: |
+          if [[ "${{ env.commit_message }}" =~ ^feat ]]; then
+            echo "increment=major" >> $GITHUB_ENV
+          elif [[ "${{ env.commit_message }}" =~ ^fix ]]; then
+            echo "increment=minor" >> $GITHUB_ENV
+          else
+            echo "increment=patch" >> $GITHUB_ENV
+          fi
+
+      - name: Increment version
+        id: increment_version
+        run: |
+          IFS='.' read -r -a version_parts <<< "${{ env.version }}"
+          if [[ "${{ env.increment }}" == "major" ]]; then
+            new_version=$((version_parts[0] + 1)).0.0
+          elif [[ "${{ env.increment }}" == "minor" ]]; then
+            new_version=${version_parts[0]}.$((version_parts[1] + 1)).0
+          else
+            new_version=${version_parts[0]}.${version_parts[1]}.$((version_parts[2] + 1))
+          fi
+          echo "new_version=$new_version" >> $GITHUB_ENV
+          echo "new_version=$new_version" >> $GITHUB_OUTPUT
+
+      - name: Update version file
+        run: echo "${{ env.new_version }}" > VERSION.txt
+
+      - name: Commit version increment
+        run: |
+          BRANCH_NAME=$(echo "${GITHUB_REF#refs/heads/}")
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add VERSION.txt
+          git commit -m "Increment version to ${{ env.new_version }}"
+          git pull origin $(echo "${GITHUB_REF#refs/heads/}") --rebase
+          git push origin HEAD:$BRANCH_NAME
+
+      - name: Write new version to environment file
+        run: echo "NEW_VERSION=${{ env.new_version }}" >> $GITHUB_ENV
