@@ -7,6 +7,7 @@ export default defineConfig({
     sourceMap: {
       js: "source-map",
     },
+    assetPrefix: "auto",
   },
   dev: {
     // It is necessary to configure assetPrefix, and in the production environment, you need to configure output.assetPrefix
