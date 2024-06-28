@@ -1,3 +1,7 @@
+## Release 0.0.11
+S3 Website URL: http://micro-app-remote-development-v3.s3-website.ap-south-1.amazonaws.com/0.0.11/
+
+
 ## Release 0.0.10
 S3 Website URL: http://micro-app-remote-development-v3.s3-website.ap-south-1.amazonaws.com/0.0.10/
 
