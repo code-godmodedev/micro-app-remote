@@ -1,0 +1,5 @@
+scope: jsRemote
+modules:
+  ./RemoteComponent: ./src/RemoteComponent.jsx
+  ./AnotherComponent: ./src/AnotherComponent.jsx
+  ./NonExistantComponent: ./src/NonExistantComponent.jsx

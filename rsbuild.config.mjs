@@ -29,18 +29,18 @@ export default defineConfig({
             {
               react: {
                 singleton: true,
-                eager: true,
+                // eager: true,
               },
             },
             {
               "react-dom": {
                 singleton: true,
-                eager: true,
+                // eager: true,
               },
             },
             {
               "gmd-mf-widget-loader": {
-                eager: true,
+                // eager: true,
                 singleton: true,
               },
             },
